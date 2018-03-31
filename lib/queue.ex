@@ -10,14 +10,17 @@ defmodule Queue do
   end
 
   def init() do
-    # in init possiamo inizializzare tutti i dati che vogliamo in questo caso passiamo subito al lancio di
-    # messageLogger che a sua volta richiamera se stesso per rimanere sempre in ascolto
+    # In init possiamo inizializzare tutte le variabili di cui abbiamo bisogno. In questo caso abbiamo la necessita di
+    # settare la variabile "pid" con l'indirizzo del modulo attuale. In questo modo sarà possibile passarlo ai Mailer
+    # che saranno poi in grado di inviare un messaggio al padre di avvenuto invio. Dopo di che passiamo al lancio di
+    # consumer che a sua volta richiamera se stesso per rimanere sempre in ascolto di eventuali nuove liste mail o dei
+    # messaggi dei Mailer.
     pid = self();
     consumer(pid)
   end
 
   def consumer(pid) do
-    # Il consumer resta in ascolto dei messaggi ed eventualmente crea processi Mailer per soddisfare le richieste
+    # Il consumer resta in ascolto dei messaggi ed eventualmente crea processi Mailer per soddisfare le richieste.
     receive do
       {:send, emails} ->
         Enum.map(emails, &spawn(Mailer, :sendMail, [&1, pid]))
